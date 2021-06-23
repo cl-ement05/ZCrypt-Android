@@ -26,3 +26,17 @@ fun writeFile(
     }
     return true
 }
+
+@Throws(IOException::class)
+fun openFile(
+    activity: MainActivity,
+    fileUri: Uri,
+): List<String> {
+    val contentResolver = activity.applicationContext.contentResolver
+
+    contentResolver.openInputStream(fileUri).use { inputStream ->
+        BufferedReader(InputStreamReader(inputStream)).use { reader ->
+            return reader.readLines()
+        }
+    }
+}

@@ -19,6 +19,8 @@
     <string name="dialog_error_invalid">There was an error while encrypting content. Please keep in mind that zcrypt cannot encrypt special characters.</string>
     <string name="dialog_error_file">There was an error while writing encrypted content to the selected file. Please try again</string>
     <string name="dialog_success_finished_encryption">Encrypted content has been successfully saved to the file you selected</string>
+    <string name="dialog_error_access_file">There was an error while ZCrypt was trying to access the file you selected. Please check it is not in use by another process and that you have the required permissions to access it</string>
+    <string name="dialog_error_decrypting_general">There was an error while trying to decrypt the content of the file you selected.</string>
 
     <!-- Icon description -->
     <string name="descr_icon_padlock">Locked padlock</string>

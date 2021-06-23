@@ -1,7 +1,6 @@
 package com.clement.zcrypt.ui.layouts
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -13,19 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.clement.zcrypt.MainActivity
 import com.clement.zcrypt.R
 import com.clement.zcrypt.core.startEncryption
 import com.clement.zcrypt.core.writeFile
-import com.clement.zcrypt.ui.theme.RobotoFont
-import com.clement.zcrypt.ui.theme.ZCryptTheme
+import com.clement.zcrypt.ui.components.EncryptionAlgorithm
 import com.google.accompanist.insets.navigationBarsWithImePadding
-import java.io.File
 
 @Composable
 fun EncryptLayout(
@@ -132,32 +127,6 @@ fun EncryptLayout(
     }
 
 }
-
-@Composable
-fun EncryptionAlgorithm(
-    @StringRes algoId: Int
-) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(top = 30.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_security_black),
-            contentDescription = stringResource(id = R.string.descr_icon_security)
-        )
-        Text(
-            text = stringResource(id = R.string.encryption_algo)
-                    + " : "
-                    + stringResource(id = algoId),
-            fontFamily = RobotoFont,
-            modifier = Modifier.padding(start = 3.dp),
-            color = Color.White
-        )
-    }
-}
-
 
 @Composable
 fun inputBox(

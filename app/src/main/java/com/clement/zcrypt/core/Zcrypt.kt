@@ -83,7 +83,7 @@ data class Zcrypt(var limitLow: Int = -1,
 
     fun decryptTime(
         inputDate: String
-    ): List<String> {
+    ): String {
         val chSize = 3
         val date: String = inputDate.substring(0, chSize * 8)
         val time: String = inputDate.substring(chSize * 8)
@@ -114,7 +114,7 @@ data class Zcrypt(var limitLow: Int = -1,
         if (minDecrypted.length == 1) minDecrypted = "0$minDecrypted"
         if (secDecrypted.length == 1) secDecrypted = "0$secDecrypted"
 
-        return listOf(dayDecrypted, monthDecrypted, yearDecrypted, hourDecrypted, minDecrypted, secDecrypted)
+        return "$dayDecrypted.$monthDecrypted.$yearDecrypted.$hourDecrypted.$minDecrypted.$secDecrypted"
 
     }
 

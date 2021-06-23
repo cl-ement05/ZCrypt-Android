@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
                     val selectedTab: Int = tabLayout()
                     if (selectedTab == 0) EncryptLayout(this@MainActivity)
-                    else DecryptLayout()
+                    else DecryptLayout(this@MainActivity)
                 }
             }
         }
