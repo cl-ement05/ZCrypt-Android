@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">ZCrypt</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="decrypt">Decrypt</string>
+    <string name="encryption_algo">Encryption algorithm</string>
+    <string name="zcrypt_algo">zcrypt</string>
+    <string name="ok">OK</string>
+
+    <!-- Inputs -->
+    <string name="message">Message</string>
+    <string name="message_placeholder">Input the message to encrypt</string>
+    <string name="sender">Sender</string>
+    <string name="sender_placeholder">Input your name</string>
+    <string name="receiver">Receiver</string>
+    <string name="receiver_placeholder">Input the name of the receiver</string>
+
+    <!--Dialogs-->
+    <string name="dialog_error_blank">Please provide at least one character for each text field. Zcrypt cannot encrypt whitespaces alone.</string>
+    <string name="dialog_error_invalid">There was an error while encrypting content. Please keep in mind that zcrypt cannot encrypt special characters.</string>
+    <string name="dialog_error_file">There was an error while writing encrypted content to the selected file. Please try again</string>
+    <string name="dialog_success_finished_encryption">Encrypted content has been successfully saved to the file you selected</string>
+
+    <!-- Icon description -->
+    <string name="descr_icon_padlock">Locked padlock</string>
+    <string name="descr_icon_padunlock">Unlocked padlock</string>
+    <string name="descr_icon_security">Security shield</string>
+    <string name="descr_icon_message">Message chat</string>
+    <string name="descr_icon_receiver">Arrow receiving</string>
+    <string name="descr_icon_send">Paper plane send</string>
+</resources>
