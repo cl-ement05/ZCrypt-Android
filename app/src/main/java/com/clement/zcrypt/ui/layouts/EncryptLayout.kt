@@ -26,6 +26,21 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 fun EncryptLayout(
     activity: MainActivity
 ) {
+    val showDialog = remember { mutableStateOf(true)}
+    val documentUri = remember { mutableStateOf<Uri?>(null) }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.CreateDocument()) {
+        documentUri.value = it
+    }
+    val encryptionResult = remember { mutableStateOf<List<String>>(emptyList()) }
+    val encryptionSuccess = remember { mutableStateOf(0)}
+    /*
+    0 is used for encryption not finished
+    1 is used for fail due to blank text fields
+    2 is used for fail due to error in zcrypt algo (usually because of special char)
+    3 is used for fail when writing file
+     */
+
+
     EncryptionAlgorithm(algoId = R.string.zcrypt_algo)
 
     Column(
@@ -59,22 +74,13 @@ fun EncryptLayout(
         )
 
 
-        val documentUri = remember { mutableStateOf<Uri?>(null) }
-        val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.CreateDocument()) {
-            documentUri.value = it
-        }
-        val encryptionResult = remember { mutableStateOf<List<String>>(emptyList()) }
-        val encryptionSuccess = remember { mutableStateOf(0)}
-        /*
-        -1 is used when encryption and file write were successful ie the whole encryption process has ended
-        0 is used for successful encryption
-        1 is used for fail due to blank text fields
-        2 is used for fail due to error in zcrypt algo (usually because of special char)
-        3 is used for fail when writing file
-         */
-
         Button(
             onClick = {
+                //resetting vars
+                encryptionResult.value = emptyList()
+                encryptionSuccess.value = 0
+                showDialog.value = true
+
                 if (messageInput.isNotBlank() && receiverInput.isNotBlank() && senderInput.isNotBlank()) {
                     encryptionResult.value = startEncryption(
                         messageInput,
@@ -105,23 +111,46 @@ fun EncryptLayout(
         }
 
 
-        if (encryptionSuccess.value != 0) {
+        if (encryptionSuccess.value != 0 && encryptionSuccess.value != -1) {
             AlertDialog(
                 onDismissRequest = { encryptionSuccess.value = 0 },
                 text = {
                     when(encryptionSuccess.value) {
-                        -1 -> Text(stringResource(id = R.string.dialog_success_finished_encryption))
                         1 -> Text(stringResource(id = R.string.dialog_error_blank))
                         2 -> Text(stringResource(id = R.string.dialog_error_invalid))
                         3 -> Text(stringResource(id = R.string.dialog_error_file))
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { encryptionSuccess.value = 0 }) {
+                    TextButton(
+                        onClick = {
+                            encryptionSuccess.value = 0
+                        }
+                    ) {
                         Text(stringResource(id = R.string.ok))
                     }
                 }
             )
+        }
+
+        if (encryptionSuccess.value == -1) {
+            if(showDialog.value) {
+                AlertDialog(
+                    onDismissRequest = { showDialog.value = false },
+                    text = {
+                        Text(stringResource(id = R.string.dialog_success_finished_encryption))
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showDialog.value = false
+                            }
+                        ) {
+                            Text(stringResource(id = R.string.ok))
+                        }
+                    }
+                )
+            }
         }
 
     }
@@ -130,11 +159,11 @@ fun EncryptLayout(
 
 @Composable
 fun inputBox(
+    modifier: Modifier = Modifier,
     @StringRes label: Int,
     @StringRes placeholder: Int,
     @DrawableRes icon: Int,
-    @StringRes iconDescription: Int,
-    modifier: Modifier = Modifier
+    @StringRes iconDescription: Int
 ) : String {
     var input by rememberSaveable { mutableStateOf("")}
     OutlinedTextField(

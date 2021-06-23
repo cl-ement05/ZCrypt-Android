@@ -1,7 +1,6 @@
 package com.clement.zcrypt.core
 
 import java.lang.Exception
-import java.lang.NumberFormatException
 import kotlin.random.Random
 
 fun startEncryption(
@@ -32,8 +31,8 @@ fun startDecryption(
 ): List<String> {
     try {
         val key = Integer.parseInt(lines[3].substring(0, 8), 2)
-        val limitLow = Integer.parseInt(lines[3].substring(8, 10))
-        val limitHigh = Integer.parseInt(lines[3].substring(10))
+        val limitLow = Integer.parseInt(lines[3].substring(9, 11))
+        val limitHigh = Integer.parseInt(lines[3].substring(11))
 
         val zcrypt = Zcrypt(limitLow, limitHigh, key)
 
@@ -52,5 +51,6 @@ fun startDecryption(
         emptyList<String>()
     }
 
+    return emptyList()
 
 }

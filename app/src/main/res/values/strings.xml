@@ -13,6 +13,7 @@
     <string name="sender_placeholder">Input your name</string>
     <string name="receiver">Receiver</string>
     <string name="receiver_placeholder">Input the name of the receiver</string>
+    <string name="time">Time</string>
 
     <!--Dialogs-->
     <string name="dialog_error_blank">Please provide at least one character for each text field. Zcrypt cannot encrypt whitespaces alone.</string>
@@ -29,4 +30,5 @@
     <string name="descr_icon_message">Message chat</string>
     <string name="descr_icon_receiver">Arrow receiving</string>
     <string name="descr_icon_send">Paper plane send</string>
+    <string name="descr_icon_clock">Clock representing time</string>
 </resources>
