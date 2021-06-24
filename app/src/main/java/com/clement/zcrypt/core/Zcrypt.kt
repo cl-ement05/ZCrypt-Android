@@ -114,7 +114,7 @@ data class Zcrypt(var limitLow: Int = -1,
         if (minDecrypted.length == 1) minDecrypted = "0$minDecrypted"
         if (secDecrypted.length == 1) secDecrypted = "0$secDecrypted"
 
-        return "$dayDecrypted.$monthDecrypted.$yearDecrypted.$hourDecrypted.$minDecrypted.$secDecrypted"
+        return "$dayDecrypted/$monthDecrypted/$yearDecrypted at $hourDecrypted:$minDecrypted:$secDecrypted"
 
     }
 

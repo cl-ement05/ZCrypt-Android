@@ -1,5 +1,7 @@
 package com.clement.zcrypt.ui.layouts
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,18 +17,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import com.clement.zcrypt.MainActivity
 import com.clement.zcrypt.R
 import com.clement.zcrypt.core.startEncryption
 import com.clement.zcrypt.core.writeFile
 import com.clement.zcrypt.ui.components.EncryptionAlgorithm
+import com.clement.zcrypt.ui.theme.RobotoFont
 import com.google.accompanist.insets.navigationBarsWithImePadding
 
 @Composable
 fun EncryptLayout(
     activity: MainActivity
 ) {
-    val showDialog = remember { mutableStateOf(true)}
+    val encryptionEnd = remember { mutableStateOf(false)}
     val documentUri = remember { mutableStateOf<Uri?>(null) }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.CreateDocument()) {
         documentUri.value = it
@@ -39,6 +43,7 @@ fun EncryptLayout(
     2 is used for fail due to error in zcrypt algo (usually because of special char)
     3 is used for fail when writing file
      */
+    val rememberSender = remember { mutableStateOf(true) }
 
 
     EncryptionAlgorithm(algoId = R.string.zcrypt_algo)
@@ -57,12 +62,19 @@ fun EncryptLayout(
             iconDescription = R.string.descr_icon_message
         )
 
+        //checking if sender name is stored on shared prefs
+        val senderValue: String =
+            activity.getSharedPreferences("zcrypt", Context.MODE_PRIVATE).
+            getString("senderMemory", "")!!
+
+
         val senderInput = inputBox(
             label = R.string.sender,
             placeholder = R.string.sender_placeholder,
             modifier = Modifier.padding(top = 20.dp),
             icon = R.drawable.ic_send_black,
-            iconDescription = R.string.descr_icon_send
+            iconDescription = R.string.descr_icon_send,
+            customValue = senderValue
         )
 
         val receiverInput = inputBox(
@@ -74,12 +86,25 @@ fun EncryptLayout(
         )
 
 
+        //remember sender row
+        Row(Modifier.padding(top = 20.dp)) {
+            Text(stringResource(id = R.string.remember_sender), fontFamily = RobotoFont)
+            
+            Switch(
+                modifier = Modifier.padding(start = 15.dp),
+                checked = rememberSender.value,
+                onCheckedChange = { newState ->
+                    rememberSender.value = newState
+                }
+            )
+        }    
+
         Button(
             onClick = {
                 //resetting vars
                 encryptionResult.value = emptyList()
                 encryptionSuccess.value = 0
-                showDialog.value = true
+                encryptionEnd.value = true
 
                 if (messageInput.isNotBlank() && receiverInput.isNotBlank() && senderInput.isNotBlank()) {
                     encryptionResult.value = startEncryption(
@@ -102,6 +127,7 @@ fun EncryptLayout(
             Text(stringResource(id = R.string.encrypt))
         }
 
+        //when receiving a value from the launcher for create document
         documentUri.value?.let {
             if (!writeFile(activity, it, encryptionResult.value)) {
                 encryptionSuccess.value = 3
@@ -111,6 +137,7 @@ fun EncryptLayout(
         }
 
 
+        //errors dialog
         if (encryptionSuccess.value != 0 && encryptionSuccess.value != -1) {
             AlertDialog(
                 onDismissRequest = { encryptionSuccess.value = 0 },
@@ -133,17 +160,31 @@ fun EncryptLayout(
             )
         }
 
+
+        //encryption end and success dialog
         if (encryptionSuccess.value == -1) {
-            if(showDialog.value) {
+            if(encryptionEnd.value) {
+                val sharedPrefs: SharedPreferences = activity.getSharedPreferences("zcrypt", Context.MODE_PRIVATE)
+                if (rememberSender.value) {
+                    //remembering sender input
+                    sharedPrefs.edit {
+                        putString("senderMemory", senderInput)
+                    }
+                } else {
+                    sharedPrefs.edit {
+                        remove("senderMemory")
+                    }
+                }
+
                 AlertDialog(
-                    onDismissRequest = { showDialog.value = false },
+                    onDismissRequest = { encryptionEnd.value = false },
                     text = {
                         Text(stringResource(id = R.string.dialog_success_finished_encryption))
                     },
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                showDialog.value = false
+                                encryptionEnd.value = false
                             }
                         ) {
                             Text(stringResource(id = R.string.ok))
@@ -152,7 +193,6 @@ fun EncryptLayout(
                 )
             }
         }
-
     }
 
 }
@@ -163,9 +203,10 @@ fun inputBox(
     @StringRes label: Int,
     @StringRes placeholder: Int,
     @DrawableRes icon: Int,
-    @StringRes iconDescription: Int
+    @StringRes iconDescription: Int,
+    customValue: String = ""
 ) : String {
-    var input by rememberSaveable { mutableStateOf("")}
+    var input by rememberSaveable { mutableStateOf(customValue)}
     OutlinedTextField(
         modifier = modifier,
         value = input,

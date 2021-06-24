@@ -5,6 +5,7 @@
     <string name="encryption_algo">Encryption algorithm</string>
     <string name="zcrypt_algo">zcrypt</string>
     <string name="ok">OK</string>
+    <string name="remember_sender">Remember sender name in memory</string>
 
     <!-- Inputs -->
     <string name="message">Message</string>

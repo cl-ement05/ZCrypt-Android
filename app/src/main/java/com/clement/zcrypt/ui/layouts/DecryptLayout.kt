@@ -30,6 +30,7 @@ import java.io.IOException
 fun DecryptLayout(activity: MainActivity) {
     EncryptionAlgorithm(algoId = R.string.zcrypt_algo)
 
+    val decryptionStarted = remember { mutableStateOf(false)}
     val documentUri = remember { mutableStateOf<Uri?>(null)}
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
         documentUri.value = it
@@ -51,6 +52,7 @@ fun DecryptLayout(activity: MainActivity) {
         Button(
             onClick = {
                 launcher.launch(arrayOf("text/plain"))
+                decryptionStarted.value = true
             },
             modifier = Modifier.padding(top = 20.dp)
         ) {
@@ -89,11 +91,9 @@ fun DecryptLayout(activity: MainActivity) {
         )
     }
 
-    val showResultDialog = remember { mutableStateOf(true)}
-
-    if (decryptionResult.value.isNotEmpty()) {
+    if (decryptionResult.value.isNotEmpty() && decryptionStarted.value) {
         AlertDialog(
-            onDismissRequest = { showResultDialog.value = false },
+            onDismissRequest = { decryptionStarted.value = false },
             text = {
                 Column {
                     ResultBox(
@@ -135,7 +135,7 @@ fun DecryptLayout(activity: MainActivity) {
             },
             confirmButton = {
                 TextButton(
-                    onClick = { showResultDialog.value = false }
+                    onClick = { decryptionStarted.value = false }
                 ) {
                     Text(stringResource(id = R.string.ok))
                 }
