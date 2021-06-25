@@ -11,8 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.clement.zcrypt.R
 import com.clement.zcrypt.ui.theme.RobotoFont
 import com.clement.zcrypt.ui.theme.ZCryptTheme
@@ -53,6 +55,21 @@ fun EncryptionAlgorithm(
             fontFamily = RobotoFont,
             modifier = Modifier.padding(start = 3.dp),
             color = Color.White
+        )
+    }
+}
+
+@Composable
+fun TextBlock(
+    stringIds: List<Int>
+) {
+    stringIds.forEach { element ->
+        Text(
+            modifier = Modifier.padding(top = 15.dp, start = 15.dp, end = 15.dp),
+            text = stringResource(id = element),
+            fontFamily = RobotoFont,
+            fontSize = 17.sp,
+            textAlign = TextAlign.Center
         )
     }
 }

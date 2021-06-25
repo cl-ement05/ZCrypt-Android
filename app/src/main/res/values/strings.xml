@@ -5,7 +5,11 @@
     <string name="encryption_algo">Encryption algorithm</string>
     <string name="zcrypt_algo">zcrypt</string>
     <string name="ok">OK</string>
+    <string name="start">Start</string>
+    <string name="lets_see_how_it_works">Let\'s see how to use ZCrypt !</string>
+    <string name="lets_see_how_decrypt_works">Now let\'s see how decrypting works</string>
     <string name="remember_sender">Remember sender name in memory</string>
+    <string name="welcome_to_zcrypt">Welcome to ZCrypt !</string>
 
     <!-- Inputs -->
     <string name="message">Message</string>
@@ -32,4 +36,23 @@
     <string name="descr_icon_receiver">Arrow receiving</string>
     <string name="descr_icon_send">Paper plane send</string>
     <string name="descr_icon_clock">Clock representing time</string>
+
+    <!--Welcome screen-->
+    <string name="welcomes_zcrypt_description">ZCrypt is a project created by Clement and has been launched for the first time on February the 24th 2020</string>
+    <string name="welcomes_zcrypt_description_2">The goal of this project is to make encryption accessible to everyone and easy to use</string>
+    <string name="welcomes_zcrypt_history">For more than a year, ZCrypt has been a Python command line application that can only bu run when certain conditions are met</string>
+    <string name="welcomes_zcrypt_history_2">So to better achieve ZCrypt\'s goal of accessibility, I decided to create an Android app to make it easier to interact with ZCrypt</string>
+
+    <string name="welcomes_explanation_base">ZCrypt can basically do two things : encrypt and decrypt a message</string>
+    <string name="welcomes_basic_steps_encrypt">So basically, here is what you need to do to encrypt a message using ZCrypt :</string>
+    <string name="welcomes_step_1_encrypt">1. Input the message you want to encrypt</string>
+    <string name="welcomes_step_2_encrypt">2. Provide the name of the sender (should be your name) along with the receiver one\'s</string>
+    <string name="welcomes_step_3_encrypt">3. And voila ! Encrypted content is stored on a file for which you can choose the name and location on your phone\'s storage</string>
+
+    <string name="welcomes_basic_steps_decrypt">So now you might be wondering how to decrypt what you just encrypted. This is very simple :</string>
+    <string name="welcomes_step_1_decrypt">1. Go to the decrypt tab and click on the decrypt button</string>
+    <string name="welcomes_step_2_decrypt">2. Select the file which contains the encrypted content</string>
+    <string name="welcomes_step_3_decrypt">3. And there it is ! A pop-up should appear containing everything you encrypted along with a timestamp </string>
+
+    <string name="welcomes_enjoy">And this is pretty much it ! I hope you enjoy this app !</string>
 </resources>
