@@ -170,7 +170,7 @@ fun EncryptLayout(
                     sharedPrefs.edit {
                         putString("senderMemory", senderInput)
                     }
-                } else {
+                } else if (sharedPrefs.getString("senderMemory", null) != null) {
                     sharedPrefs.edit {
                         remove("senderMemory")
                     }

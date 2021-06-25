@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.clement.zcrypt.MainActivity
 import com.clement.zcrypt.R
 import com.clement.zcrypt.core.openFile
@@ -102,7 +103,7 @@ fun DecryptLayout(activity: MainActivity) {
                         iconDescription = R.string.descr_icon_clock,
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
-                        Text(decryptionResult.value[0])
+                        Text(decryptionResult.value[0], fontSize = 18.sp)
                     }
 
                     ResultBox(
@@ -111,7 +112,7 @@ fun DecryptLayout(activity: MainActivity) {
                         iconDescription = R.string.descr_icon_message,
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
-                        Text(decryptionResult.value[3])
+                        Text(decryptionResult.value[3], fontSize = 18.sp)
                     }
 
                     ResultBox(
@@ -120,7 +121,7 @@ fun DecryptLayout(activity: MainActivity) {
                         iconDescription = R.string.descr_icon_send,
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
-                        Text(decryptionResult.value[1])
+                        Text(decryptionResult.value[1], fontSize = 18.sp)
                     }
 
                     ResultBox(
@@ -129,7 +130,7 @@ fun DecryptLayout(activity: MainActivity) {
                         iconDescription = R.string.descr_icon_receiver,
                         modifier = Modifier.padding(top = 20.dp)
                     ) {
-                        Text(decryptionResult.value[2])
+                        Text(decryptionResult.value[2], fontSize = 18.sp)
                     }
                 }
             },
@@ -163,7 +164,8 @@ fun ResultBox(
             )
             Text(
                 text = stringResource(title),
-                modifier = Modifier.padding(start = 5.dp)
+                modifier = Modifier.padding(start = 5.dp),
+                fontSize = 18.sp
             )
         }
 
