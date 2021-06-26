@@ -7,6 +7,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -24,6 +25,7 @@ import com.clement.zcrypt.MainActivity
 import com.clement.zcrypt.R
 import com.clement.zcrypt.core.openFile
 import com.clement.zcrypt.core.startDecryption
+import com.clement.zcrypt.ui.components.AppDialog
 import com.clement.zcrypt.ui.components.EncryptionAlgorithm
 import java.io.IOException
 
@@ -74,22 +76,20 @@ fun DecryptLayout(activity: MainActivity) {
     }
 
     if (decryptionSuccess.value != 0) {
-        AlertDialog(
-            onDismissRequest = { decryptionSuccess.value = 0 },
-            text = {
-                when(decryptionSuccess.value) {
-                    1 -> Text(stringResource(id = R.string.dialog_error_access_file))
-                    2 -> Text(stringResource(id = R.string.dialog_error_decrypting_general))
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { decryptionSuccess.value = 0 }
-                ) {
-                    Text(stringResource(id = R.string.ok))
-                }
+        when (decryptionSuccess.value) {
+            1 -> AppDialog(
+                R.string.dialog_error_access_file,
+            ) {
+                decryptionSuccess.value = 0
             }
-        )
+
+            2 -> AppDialog(
+                    R.string.dialog_error_decrypting_general
+            ) {
+                decryptionSuccess.value = 0
+            }
+        }
+
     }
 
     if (decryptionResult.value.isNotEmpty() && decryptionStarted.value) {
@@ -168,7 +168,8 @@ fun ResultBox(
                 fontSize = 18.sp
             )
         }
-
-        content()
+        SelectionContainer {
+            content()
+        }
     }
 }

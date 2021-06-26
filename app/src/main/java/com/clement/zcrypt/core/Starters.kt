@@ -6,10 +6,16 @@ import kotlin.random.Random
 fun startEncryption(
     messageInput: String,
     receiverInput: String,
-    senderInput: String
+    senderInput: String,
+    savedLastKey: Int
 ): List<String> {
     val zcrypt = Zcrypt()
-    var lastKey: Int = zcrypt.createKey(Random.nextInt(100, 190))
+    var lastKey = 0
+    lastKey = if (savedLastKey != -1) {
+        zcrypt.createKey(savedLastKey)
+    } else {
+        zcrypt.createKey(Random.nextInt(100, 190))
+    }
 
     try {
         return with(zcrypt) {
@@ -18,7 +24,8 @@ fun startEncryption(
                 encryptString(senderInput),
                 encryptString(receiverInput),
                 "${Zcrypt.convertToEightBitBinary(zcrypt.keyNum)}b${zcrypt.limitLow}${zcrypt.limitHigh}",
-                encryptString(messageInput)
+                encryptString(messageInput),
+                lastKey.toString()
             )
          }
     } catch (e: Exception) {

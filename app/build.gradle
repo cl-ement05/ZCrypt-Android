@@ -11,8 +11,8 @@ android {
         applicationId "com.clement.zcrypt"
         minSdk 26
         targetSdk 30
-        versionCode 1
-        versionName "Synnelet"
+        versionCode 10
+        versionName "1.0 Synnelet"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

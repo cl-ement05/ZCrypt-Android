@@ -3,9 +3,7 @@ package com.clement.zcrypt.ui.components
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -72,6 +70,26 @@ fun TextBlock(
             textAlign = TextAlign.Center
         )
     }
+}
+
+@Composable
+fun AppDialog(
+    @StringRes stringId: Int,
+    dismissAction: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = dismissAction,
+        text = {
+            Text(stringResource(id = stringId))
+        },
+        confirmButton = {
+            TextButton(
+                onClick = dismissAction
+            ) {
+                Text(stringResource(id = R.string.ok))
+            }
+        }
+    )
 }
 
 @Preview

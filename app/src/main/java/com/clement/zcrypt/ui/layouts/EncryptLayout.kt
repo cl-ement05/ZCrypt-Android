@@ -22,6 +22,7 @@ import com.clement.zcrypt.MainActivity
 import com.clement.zcrypt.R
 import com.clement.zcrypt.core.startEncryption
 import com.clement.zcrypt.core.writeFile
+import com.clement.zcrypt.ui.components.AppDialog
 import com.clement.zcrypt.ui.components.EncryptionAlgorithm
 import com.clement.zcrypt.ui.theme.RobotoFont
 import com.google.accompanist.insets.navigationBarsWithImePadding
@@ -30,6 +31,7 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 fun EncryptLayout(
     activity: MainActivity
 ) {
+    val sharedPrefs: SharedPreferences = activity.getSharedPreferences("zcrypt", Context.MODE_PRIVATE)
     val encryptionEnd = remember { mutableStateOf(false)}
     val documentUri = remember { mutableStateOf<Uri?>(null) }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.CreateDocument()) {
@@ -43,7 +45,7 @@ fun EncryptLayout(
     2 is used for fail due to error in zcrypt algo (usually because of special char)
     3 is used for fail when writing file
      */
-    val rememberSender = remember { mutableStateOf(true) }
+    val rememberSender = remember { mutableStateOf(sharedPrefs.getBoolean("enableSenderMemory", true)) }
 
 
     EncryptionAlgorithm(algoId = R.string.zcrypt_algo)
@@ -95,6 +97,9 @@ fun EncryptLayout(
                 checked = rememberSender.value,
                 onCheckedChange = { newState ->
                     rememberSender.value = newState
+                    sharedPrefs.edit {
+                        putBoolean("enableSenderMemory", newState)
+                    }
                 }
             )
         }    
@@ -110,7 +115,8 @@ fun EncryptLayout(
                     encryptionResult.value = startEncryption(
                         messageInput,
                         receiverInput,
-                        senderInput
+                        senderInput,
+                        sharedPrefs.getInt("zcryptLastKey", -1)
                     )
 
                     if (encryptionResult.value.isNotEmpty()) {
@@ -129,7 +135,7 @@ fun EncryptLayout(
 
         //when receiving a value from the launcher for create document
         documentUri.value?.let {
-            if (!writeFile(activity, it, encryptionResult.value)) {
+            if (!writeFile(activity, it, encryptionResult.value.subList(0, 5))) {
                 encryptionSuccess.value = 3
             } else {
                 encryptionSuccess.value = -1
@@ -139,32 +145,23 @@ fun EncryptLayout(
 
         //errors dialog
         if (encryptionSuccess.value != 0 && encryptionSuccess.value != -1) {
-            AlertDialog(
-                onDismissRequest = { encryptionSuccess.value = 0 },
-                text = {
-                    when(encryptionSuccess.value) {
-                        1 -> Text(stringResource(id = R.string.dialog_error_blank))
-                        2 -> Text(stringResource(id = R.string.dialog_error_invalid))
-                        3 -> Text(stringResource(id = R.string.dialog_error_file))
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            encryptionSuccess.value = 0
-                        }
-                    ) {
-                        Text(stringResource(id = R.string.ok))
-                    }
+            when(encryptionSuccess.value) {
+                1 -> AppDialog(R.string.dialog_error_blank) {
+                    encryptionSuccess.value = 0
                 }
-            )
+                2 -> AppDialog(R.string.dialog_error_invalid) {
+                    encryptionSuccess.value = 0
+                }
+                3 -> AppDialog(R.string.dialog_error_file) {
+                    encryptionSuccess.value = 0
+                }
+            }
         }
 
 
         //encryption end and success dialog
         if (encryptionSuccess.value == -1) {
             if(encryptionEnd.value) {
-                val sharedPrefs: SharedPreferences = activity.getSharedPreferences("zcrypt", Context.MODE_PRIVATE)
                 if (rememberSender.value) {
                     //remembering sender input
                     sharedPrefs.edit {
@@ -176,25 +173,18 @@ fun EncryptLayout(
                     }
                 }
 
-                AlertDialog(
-                    onDismissRequest = { encryptionEnd.value = false },
-                    text = {
-                        Text(stringResource(id = R.string.dialog_success_finished_encryption))
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                encryptionEnd.value = false
-                            }
-                        ) {
-                            Text(stringResource(id = R.string.ok))
-                        }
-                    }
-                )
+                //saving last key to shared prefs
+                sharedPrefs.edit {
+                    putInt("zcryptLastKey", encryptionResult.value[5].toInt())
+                }
+
+                AppDialog(R.string.dialog_success_finished_encryption) {
+                    encryptionEnd.value = false
+                }
+
             }
         }
     }
-
 }
 
 @Composable
