@@ -2,6 +2,7 @@ package com.clement.zcrypt.core
 
 import java.lang.Exception
 import java.lang.NumberFormatException
+import java.lang.StringIndexOutOfBoundsException
 import kotlin.random.Random
 
 fun mainEncrypt(
@@ -44,6 +45,8 @@ fun loadZcryptSettings(
         listOf(limitLow, limitHigh, key)
 
     } catch (e: NumberFormatException) {
+        null
+    } catch (e: StringIndexOutOfBoundsException) {
         null
     }
 
