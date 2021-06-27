@@ -3,7 +3,6 @@ package com.clement.zcrypt.core
 import android.net.Uri
 import com.clement.zcrypt.MainActivity
 import java.io.*
-import java.lang.Exception
 
 fun writeFile(
     activity: MainActivity,
