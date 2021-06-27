@@ -1,6 +1,5 @@
 package com.clement.zcrypt.ui.layouts
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -23,8 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.clement.zcrypt.MainActivity
 import com.clement.zcrypt.R
-import com.clement.zcrypt.core.openFile
-import com.clement.zcrypt.core.startDecryption
+import com.clement.zcrypt.core.OperationStatus
+import com.clement.zcrypt.core.readFileLines
+import com.clement.zcrypt.core.loadZcryptSettings
+import com.clement.zcrypt.core.mainDecrypt
 import com.clement.zcrypt.ui.components.AppDialog
 import com.clement.zcrypt.ui.components.EncryptionAlgorithm
 import java.io.IOException
@@ -33,20 +34,32 @@ import java.io.IOException
 fun DecryptLayout(activity: MainActivity) {
     EncryptionAlgorithm(algoId = R.string.zcrypt_algo)
 
-    val decryptionStarted = remember { mutableStateOf(false)}
-    val documentUri = remember { mutableStateOf<Uri?>(null)}
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
-        documentUri.value = it
-    }
-
     val decryptionResult = remember { mutableStateOf<List<String>>(emptyList())}
-    val decryptionSuccess = remember { mutableStateOf(0) }
+    val decryptionStatus = remember { mutableStateOf(OperationStatus.PENDING) }
 
-    /*
-    0 when everything is fine
-    1 when IO Exception is thrown while trying to read from file
-    2 when exception during the *real* decryption or when parsing file lines
-     */
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { documentUri ->
+        if (documentUri != null) {
+            try {
+                val documentLines = readFileLines(activity, documentUri)
+                val zcryptSettings = loadZcryptSettings(documentLines)
+
+                if (zcryptSettings == null) {
+                    decryptionStatus.value = OperationStatus.INVALID_FILE_FORMAT
+                }
+                else {
+                    decryptionResult.value = mainDecrypt(zcryptSettings[0], zcryptSettings[1], zcryptSettings[2], documentLines)
+
+                    if (decryptionResult.value.isNotEmpty()) {
+                        decryptionStatus.value = OperationStatus.SUCCESS
+                    } else {
+                        decryptionStatus.value = OperationStatus.ZCRYPT_ALGO_ERROR
+                    }
+                }
+            } catch (e: IOException) {
+                decryptionStatus.value = OperationStatus.IO_OR_FILE_ERROR
+            }
+        } else decryptionStatus.value = OperationStatus.NO_FILE_SELECTED
+    }
 
     Column(
         Modifier.fillMaxSize(),
@@ -55,7 +68,6 @@ fun DecryptLayout(activity: MainActivity) {
         Button(
             onClick = {
                 launcher.launch(arrayOf("text/plain"))
-                decryptionStarted.value = true
             },
             modifier = Modifier.padding(top = 20.dp)
         ) {
@@ -63,38 +75,43 @@ fun DecryptLayout(activity: MainActivity) {
         }
     }
 
-    documentUri.value?.let {
-        try {
-            val documentLines = openFile(activity, documentUri.value!!)
-            decryptionResult.value = startDecryption(documentLines)
-            if (decryptionResult.value.isEmpty()) {
-                decryptionSuccess.value = 2
-            }
-        } catch (e: IOException) {
-            decryptionSuccess.value = 1
-        }
+    //error dialogs
+    when (decryptionStatus.value) {
+        OperationStatus.IO_OR_FILE_ERROR -> AppDialog(
+            titleId = R.string.error,
+            stringId = R.string.dialog_error_file_no_access,
+            variable = decryptionStatus,
+            newValue = 0
+        )
+
+        OperationStatus.ZCRYPT_ALGO_ERROR -> AppDialog(
+            titleId = R.string.error,
+            stringId = R.string.dialog_error_zcrypt_algo,
+            variable = decryptionStatus,
+            newValue = 0,
+            formattingValue = "decrypted"
+        )
+
+        OperationStatus.NO_FILE_SELECTED -> AppDialog(
+            titleId = R.string.error,
+            stringId = R.string.dialog_error_no_file_selected,
+            variable = decryptionStatus,
+            newValue = 0
+        )
+
+        OperationStatus.INVALID_FILE_FORMAT -> AppDialog(
+            titleId = R.string.error,
+            stringId = R.string.dialog_error_file_invalid_format,
+            variable = decryptionStatus,
+            newValue = 0
+        )
     }
 
-    if (decryptionSuccess.value != 0) {
-        when (decryptionSuccess.value) {
-            1 -> AppDialog(
-                R.string.dialog_error_access_file,
-            ) {
-                decryptionSuccess.value = 0
-            }
 
-            2 -> AppDialog(
-                    R.string.dialog_error_decrypting_general
-            ) {
-                decryptionSuccess.value = 0
-            }
-        }
-
-    }
-
-    if (decryptionResult.value.isNotEmpty() && decryptionStarted.value) {
+    //result dialog
+    if (decryptionResult.value.isNotEmpty() && decryptionStatus.value == OperationStatus.SUCCESS) {
         AlertDialog(
-            onDismissRequest = { decryptionStarted.value = false },
+            onDismissRequest = { decryptionStatus.value = 0 },
             text = {
                 Column {
                     ResultBox(
@@ -136,7 +153,7 @@ fun DecryptLayout(activity: MainActivity) {
             },
             confirmButton = {
                 TextButton(
-                    onClick = { decryptionStarted.value = false }
+                    onClick = { decryptionStatus.value = 0 }
                 ) {
                     Text(stringResource(id = R.string.ok))
                 }

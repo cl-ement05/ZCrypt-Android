@@ -2,7 +2,6 @@ package com.clement.zcrypt.ui.layouts
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -20,7 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import com.clement.zcrypt.MainActivity
 import com.clement.zcrypt.R
-import com.clement.zcrypt.core.startEncryption
+import com.clement.zcrypt.core.OperationStatus
+import com.clement.zcrypt.core.mainEncrypt
 import com.clement.zcrypt.core.writeFile
 import com.clement.zcrypt.ui.components.AppDialog
 import com.clement.zcrypt.ui.components.EncryptionAlgorithm
@@ -32,21 +32,20 @@ fun EncryptLayout(
     activity: MainActivity
 ) {
     val sharedPrefs: SharedPreferences = activity.getSharedPreferences("zcrypt", Context.MODE_PRIVATE)
-    val encryptionEnd = remember { mutableStateOf(false)}
-    val documentUri = remember { mutableStateOf<Uri?>(null) }
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.CreateDocument()) {
-        documentUri.value = it
-    }
-    val encryptionResult = remember { mutableStateOf<List<String>>(emptyList()) }
-    val encryptionSuccess = remember { mutableStateOf(0)}
-    /*
-    0 is used for encryption not finished
-    1 is used for fail due to blank text fields
-    2 is used for fail due to error in zcrypt algo (usually because of special char)
-    3 is used for fail when writing file
-     */
     val rememberSender = remember { mutableStateOf(sharedPrefs.getBoolean("enableSenderMemory", true)) }
 
+    val encryptionResult = remember { mutableStateOf<List<String>>(emptyList()) }
+    val encryptionStatus = remember { mutableStateOf(0)}
+
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.CreateDocument()) { documentUri ->
+        if (documentUri != null) {
+            if (!writeFile(activity, documentUri, encryptionResult.value.subList(0, 5))) {
+                encryptionStatus.value = OperationStatus.IO_OR_FILE_ERROR
+            } else {
+                encryptionStatus.value = OperationStatus.SUCCESS
+            }
+        } else encryptionStatus.value = OperationStatus.NO_FILE_SELECTED
+    }
 
     EncryptionAlgorithm(algoId = R.string.zcrypt_algo)
 
@@ -108,11 +107,9 @@ fun EncryptLayout(
             onClick = {
                 //resetting vars
                 encryptionResult.value = emptyList()
-                encryptionSuccess.value = 0
-                encryptionEnd.value = true
 
                 if (messageInput.isNotBlank() && receiverInput.isNotBlank() && senderInput.isNotBlank()) {
-                    encryptionResult.value = startEncryption(
+                    encryptionResult.value = mainEncrypt(
                         messageInput,
                         receiverInput,
                         senderInput,
@@ -122,10 +119,10 @@ fun EncryptLayout(
                     if (encryptionResult.value.isNotEmpty()) {
                         launcher.launch("encrypted.txt")
                     } else {
-                        encryptionSuccess.value = 2
+                        encryptionStatus.value = OperationStatus.ZCRYPT_ALGO_ERROR
                     }
                 } else {
-                    encryptionSuccess.value = 1
+                    encryptionStatus.value = OperationStatus.BLANK_FIELDS
                 }
             },
             modifier = Modifier.padding(top = 20.dp)
@@ -133,56 +130,61 @@ fun EncryptLayout(
             Text(stringResource(id = R.string.encrypt))
         }
 
-        //when receiving a value from the launcher for create document
-        documentUri.value?.let {
-            if (!writeFile(activity, it, encryptionResult.value.subList(0, 5))) {
-                encryptionSuccess.value = 3
-            } else {
-                encryptionSuccess.value = -1
-            }
-        }
-
-
         //errors dialog
-        if (encryptionSuccess.value != 0 && encryptionSuccess.value != -1) {
-            when(encryptionSuccess.value) {
-                1 -> AppDialog(R.string.dialog_error_blank) {
-                    encryptionSuccess.value = 0
-                }
-                2 -> AppDialog(R.string.dialog_error_invalid) {
-                    encryptionSuccess.value = 0
-                }
-                3 -> AppDialog(R.string.dialog_error_file) {
-                    encryptionSuccess.value = 0
-                }
-            }
+        when(encryptionStatus.value) {
+            OperationStatus.BLANK_FIELDS -> AppDialog(
+                titleId = R.string.error,
+                stringId = R.string.dialog_error_blank,
+                variable = encryptionStatus,
+                newValue = 0
+            )
+            OperationStatus.ZCRYPT_ALGO_ERROR -> AppDialog(
+                titleId = R.string.error,
+                stringId = R.string.dialog_error_zcrypt_algo,
+                variable = encryptionStatus,
+                newValue = 0,
+                formattingValue = "encrypted"
+            )
+            OperationStatus.NO_FILE_SELECTED -> AppDialog(
+                titleId = R.string.error,
+                stringId = R.string.dialog_error_no_file_selected,
+                variable = encryptionStatus,
+                newValue = 0
+            )
+            OperationStatus.IO_OR_FILE_ERROR -> AppDialog(
+                titleId = R.string.error,
+                stringId = R.string.dialog_error_file_no_access,
+                variable = encryptionStatus,
+                newValue = 0
+            )
         }
 
 
-        //encryption end and success dialog
-        if (encryptionSuccess.value == -1) {
-            if(encryptionEnd.value) {
-                if (rememberSender.value) {
-                    //remembering sender input
-                    sharedPrefs.edit {
-                        putString("senderMemory", senderInput)
-                    }
-                } else if (sharedPrefs.getString("senderMemory", null) != null) {
-                    sharedPrefs.edit {
-                        remove("senderMemory")
-                    }
-                }
-
-                //saving last key to shared prefs
+        //encryption success dialog
+        if (encryptionStatus.value == OperationStatus.SUCCESS) {
+            if (rememberSender.value) {
+                //remembering sender input
                 sharedPrefs.edit {
-                    putInt("zcryptLastKey", encryptionResult.value[5].toInt())
+                    putString("senderMemory", senderInput)
                 }
-
-                AppDialog(R.string.dialog_success_finished_encryption) {
-                    encryptionEnd.value = false
+            } else if (sharedPrefs.getString("senderMemory", null) != null) {
+                sharedPrefs.edit {
+                    remove("senderMemory")
                 }
-
             }
+
+            //saving last key to shared prefs
+            sharedPrefs.edit {
+                putInt("zcryptLastKey", encryptionResult.value[5].toInt())
+            }
+
+            AppDialog(
+                titleId = R.string.success,
+                stringId = R.string.dialog_success_finished_encryption,
+                variable = encryptionStatus,
+                newValue = 0
+            )
+
         }
     }
 }

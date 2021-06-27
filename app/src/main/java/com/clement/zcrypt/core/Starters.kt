@@ -1,17 +1,17 @@
 package com.clement.zcrypt.core
 
 import java.lang.Exception
+import java.lang.NumberFormatException
 import kotlin.random.Random
 
-fun startEncryption(
+fun mainEncrypt(
     messageInput: String,
     receiverInput: String,
     senderInput: String,
     savedLastKey: Int
 ): List<String> {
     val zcrypt = Zcrypt()
-    var lastKey = 0
-    lastKey = if (savedLastKey != -1) {
+    val lastKey = if (savedLastKey != -1) {
         zcrypt.createKey(savedLastKey)
     } else {
         zcrypt.createKey(Random.nextInt(100, 190))
@@ -33,31 +33,38 @@ fun startEncryption(
     }
 }
 
-fun startDecryption(
+fun loadZcryptSettings(
     lines: List<String>
-): List<String> {
+): List<Int>? {
     try {
         val key = Integer.parseInt(lines[3].substring(0, 8), 2)
         val limitLow = Integer.parseInt(lines[3].substring(9, 11))
         val limitHigh = Integer.parseInt(lines[3].substring(11))
 
-        val zcrypt = Zcrypt(limitLow, limitHigh, key)
+        return listOf(limitLow, limitHigh, key)
 
-        try {
-            return listOf(
-                zcrypt.decryptTime(lines[0]),
-                zcrypt.decryptString(lines[1]),
-                zcrypt.decryptString(lines[2]),
-                zcrypt.decryptString(lines[4])
-            )
-        } catch (e: Exception) {
-            return emptyList()
-        }
-
-    } catch (e: Exception) {
-        emptyList<String>()
+    } catch (e: NumberFormatException) {
+        return null
     }
 
-    return emptyList()
+}
 
+fun mainDecrypt(
+    limitLow: Int,
+    limitHigh: Int,
+    key: Int,
+    lines: List<String>
+): List<String> {
+    try {
+        val zcrypt = Zcrypt(limitLow, limitHigh, key)
+
+        return listOf(
+            zcrypt.decryptTime(lines[0]),
+            zcrypt.decryptString(lines[1]),
+            zcrypt.decryptString(lines[2]),
+            zcrypt.decryptString(lines[4])
+        )
+    } catch (e: Exception) {
+        return emptyList()
+    }
 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -73,14 +74,25 @@ fun TextBlock(
 }
 
 @Composable
-fun AppDialog(
+fun <T> AppDialog(
+    @StringRes titleId: Int,
     @StringRes stringId: Int,
-    dismissAction: () -> Unit
+    variable: MutableState<T>,
+    newValue: T,
+    dismissAction: () -> Unit = { variable.value = newValue },
+    formattingValue: String? = null
 ) {
     AlertDialog(
         onDismissRequest = dismissAction,
+        title = {
+            Text(stringResource(id = titleId))
+        },
         text = {
-            Text(stringResource(id = stringId))
+            if (formattingValue == null) {
+                Text(stringResource(id = stringId))
+            } else {
+                Text(stringResource(id = stringId, formattingValue))
+            }
         },
         confirmButton = {
             TextButton(

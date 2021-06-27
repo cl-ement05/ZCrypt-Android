@@ -3,6 +3,7 @@ package com.clement.zcrypt.core
 import android.net.Uri
 import com.clement.zcrypt.MainActivity
 import java.io.*
+import java.lang.Exception
 
 fun writeFile(
     activity: MainActivity,
@@ -27,8 +28,7 @@ fun writeFile(
     return true
 }
 
-@Throws(IOException::class)
-fun openFile(
+fun readFileLines(
     activity: MainActivity,
     fileUri: Uri,
 ): List<String> {
@@ -39,4 +39,5 @@ fun openFile(
             return reader.readLines()
         }
     }
+
 }
