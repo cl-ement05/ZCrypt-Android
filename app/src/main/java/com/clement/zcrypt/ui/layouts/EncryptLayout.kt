@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -15,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import com.clement.zcrypt.MainActivity
@@ -47,6 +50,11 @@ fun EncryptLayout(
         } else encryptionStatus.value = OperationStatus.NO_FILE_SELECTED
     }
 
+    //checking if sender name is stored on shared prefs
+    val senderValue: String =
+        activity.getSharedPreferences("zcrypt", Context.MODE_PRIVATE).
+        getString("senderMemory", "")!!
+
     EncryptionAlgorithm(algoId = R.string.zcrypt_algo)
 
     Column(
@@ -60,14 +68,9 @@ fun EncryptLayout(
             placeholder = R.string.message_placeholder,
             modifier = Modifier.padding(top = 20.dp),
             icon = R.drawable.ic_message_black,
-            iconDescription = R.string.descr_icon_message
+            iconDescription = R.string.descr_icon_message,
+            imeAction = ImeAction.Done
         )
-
-        //checking if sender name is stored on shared prefs
-        val senderValue: String =
-            activity.getSharedPreferences("zcrypt", Context.MODE_PRIVATE).
-            getString("senderMemory", "")!!
-
 
         val senderInput = inputBox(
             label = R.string.sender,
@@ -75,7 +78,8 @@ fun EncryptLayout(
             modifier = Modifier.padding(top = 20.dp),
             icon = R.drawable.ic_send_black,
             iconDescription = R.string.descr_icon_send,
-            customValue = senderValue
+            customValue = senderValue,
+            imeAction = ImeAction.Done,
         )
 
         val receiverInput = inputBox(
@@ -83,7 +87,8 @@ fun EncryptLayout(
             placeholder = R.string.receiver_placeholder,
             modifier = Modifier.padding(top = 20.dp),
             icon = R.drawable.ic_receiver_black,
-            iconDescription = R.string.descr_icon_receiver
+            iconDescription = R.string.descr_icon_receiver,
+            imeAction = ImeAction.Send
         )
 
 
@@ -101,7 +106,7 @@ fun EncryptLayout(
                     }
                 }
             )
-        }    
+        }
 
         Button(
             onClick = {
@@ -196,7 +201,8 @@ fun inputBox(
     @StringRes placeholder: Int,
     @DrawableRes icon: Int,
     @StringRes iconDescription: Int,
-    customValue: String = ""
+    customValue: String = "",
+    imeAction: ImeAction = ImeAction.Default,
 ) : String {
     var input by rememberSaveable { mutableStateOf(customValue)}
     OutlinedTextField(
@@ -214,7 +220,8 @@ fun inputBox(
                 painter = painterResource(id = icon),
                 contentDescription = stringResource(id = iconDescription)
             )
-        }
+        },
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = imeAction),
     )
     return input
 }

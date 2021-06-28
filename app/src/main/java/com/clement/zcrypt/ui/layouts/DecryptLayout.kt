@@ -111,6 +111,7 @@ fun DecryptLayout(activity: MainActivity) {
     //result dialog
     if (decryptionResult.value.isNotEmpty() && decryptionStatus.value == OperationStatus.SUCCESS) {
         AlertDialog(
+            title = { Text(stringResource(id = R.string.success), fontSize = 22.sp) },
             onDismissRequest = { decryptionStatus.value = 0 },
             text = {
                 Column {
