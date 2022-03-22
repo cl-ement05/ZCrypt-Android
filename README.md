@@ -11,4 +11,4 @@ Feel free to make suggestions or even commit improvements
 I hope you enjoy it !
 
 ## License
-ZCrypt is under the [GNU GPLv3 license](LICENSE.md)
+ZCrypt is under the [Apache-2.0 License](LICENSE.md)
